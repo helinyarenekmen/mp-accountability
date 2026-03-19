@@ -1064,11 +1064,19 @@ function drawMap(metric){
     height:430
   };
   const el=document.getElementById('map-container');
-  Plotly.react(el,[trace],layout,{responsive:true,displayModeBar:false,scrollZoom:false})
+  if(typeof Plotly==='undefined'){
+    el.innerHTML='<p style="padding:2rem;color:var(--text2);text-align:center">Harita yüklenemedi — lütfen sayfayı yenileyin.</p>';
+    return;
+  }
+  Plotly.purge(el);
+  Plotly.newPlot(el,[trace],layout,{responsive:true,displayModeBar:false,scrollZoom:false})
     .then(gd=>{
       gd.on('plotly_click',d=>{
         if(d&&d.points&&d.points[0])showProvDetail(d.points[0].location);
       });
+    }).catch(e=>{
+      console.error('Map render error:',e);
+      el.innerHTML='<p style="padding:2rem;color:var(--text2);text-align:center">Harita render hatası: '+e.message+'</p>';
     });
 }
 
