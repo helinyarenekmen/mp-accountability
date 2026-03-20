@@ -651,7 +651,9 @@ const PC={"AKP":"#FF6B35","CHP":"#E31E24","DEM":"#9333EA","MHP":"#1E40AF","İYİ
 const TC=['#3B82F6','#EF4444','#10B981','#F59E0B','#8B5CF6','#06B6D4','#F97316','#84CC16','#EC4899','#6366F1','#14B8A6','#F43F5E','#A78BFA','#34D399','#FBBF24','#60A5FA','#FB923C','#4ADE80','#A3E635'];
 let fil=[...D],pg=0,PG=24,cur=null,cmp=[];
 const MXQ=Math.max(...D.map(r=>r.q));
-const pc=p=>PC[p]||'#6B7280';
+const CANON_PARTY={HDP:'DEM',BDP:'DEM','BDP;DBP':'DEM',DEHAP:'DEM',DTP:'DEM',HADEP:'DEM',YSP:'DEM',IYI:'İYİ','—':null,'-':null};
+const canonParty=p=>p in CANON_PARTY?CANON_PARTY[p]:p;
+const pc=p=>{const cp=canonParty(p);return PC[cp]||PC[p]||'#6B7280';};
 const badge=p=>{const c=pc(p);return`<span class="pb" style="background:${c}20;color:${c};border:1px solid ${c}44">${p||'?'}</span>`;};
 const actBadge=q=>q===0?`<span class="rb rz">${S('badge-zero')}</span>`:q<=10?`<span class="rb rl">${S('badge-low')}</span>`:'';
 
@@ -1140,7 +1142,14 @@ function rProv(){
 
 function rParty(){
   const by={};
-  D.forEach(r=>{if(!r.party)return;if(!by[r.party])by[r.party]={q:0,sp:0,b:0,n:0};by[r.party].q+=r.q;by[r.party].sp+=r.speeches;by[r.party].b+=r.bills;by[r.party].n++;});
+  function addTo(p,field,val){const cp=canonParty(p);if(!cp)return;if(!by[cp])by[cp]={q:0,sp:0,b:0,n:0};by[cp][field]+=val;}
+  D.forEach(r=>{
+    const hasPy=r.py&&Object.keys(r.py).length>0;
+    Object.entries(r.act||{}).forEach(([yr,cnt])=>{addTo(hasPy?(r.py[yr]||r.party):r.party,'q',cnt);});
+    Object.entries(r.sp_act||{}).forEach(([yr,cnt])=>{addTo(hasPy?(r.py[yr]||r.party):r.party,'sp',cnt);});
+    if(r.bills)addTo(r.party,'b',r.bills);
+    if(r.party&&r.party!=='—'&&r.party!=='-')addTo(r.party,'n',1);
+  });
   const ps=Object.keys(by).sort((a,b)=>by[b].q-by[a].q);
   const lo=t=>{return{margin:{l:50,r:30,t:10,b:60},paper_bgcolor:'transparent',plot_bgcolor:'transparent',yaxis:{title:t,showgrid:true,gridcolor:'#f0f0f0'},font:{family:'Inter,sans-serif',size:12},height:320}};
   const op={responsive:true,displayModeBar:false};
