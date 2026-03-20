@@ -651,7 +651,7 @@ const PC={"AKP":"#FF6B35","CHP":"#E31E24","DEM":"#9333EA","MHP":"#1E40AF","İYİ
 const TC=['#3B82F6','#EF4444','#10B981','#F59E0B','#8B5CF6','#06B6D4','#F97316','#84CC16','#EC4899','#6366F1','#14B8A6','#F43F5E','#A78BFA','#34D399','#FBBF24','#60A5FA','#FB923C','#4ADE80','#A3E635'];
 let fil=[...D],pg=0,PG=24,cur=null,cmp=[];
 const MXQ=Math.max(...D.map(r=>r.q));
-const CANON_PARTY={HDP:'DEM',BDP:'DEM',DEHAP:'DEM',DTP:'DEM',HADEP:'DEM',YSP:'DEM',IYI:'İYİ'};
+const CANON_PARTY={HDP:'DEM',BDP:'DEM','BDP;DBP':'DEM',DEHAP:'DEM',DTP:'DEM',HADEP:'DEM',YSP:'DEM',IYI:'İYİ','—':null,'-':null};
 const canonParty=p=>CANON_PARTY[p]||p;
 const pc=p=>PC[canonParty(p)]||PC[p]||'#6B7280';
 const badge=p=>{const c=pc(p);return`<span class="pb" style="background:${c}20;color:${c};border:1px solid ${c}44">${p||'?'}</span>`;};
@@ -1143,7 +1143,7 @@ function rProv(){
 
 function rParty(){
   const by={};
-  D.forEach(r=>{if(!r.party)return;const cp=canonParty(r.party);if(!by[cp])by[cp]={q:0,sp:0,b:0,n:0};by[cp].q+=r.q;by[cp].sp+=r.speeches;by[cp].b+=r.bills;by[cp].n++;});
+  D.forEach(r=>{if(!r.party)return;const cp=canonParty(r.party);if(!cp)return;if(!by[cp])by[cp]={q:0,sp:0,b:0,n:0};by[cp].q+=r.q;by[cp].sp+=r.speeches;by[cp].b+=r.bills;by[cp].n++;});
   const ps=Object.keys(by).sort((a,b)=>by[b].q-by[a].q);
   const PLABEL={DEM:'DEM/HDP/BDP'};
   const pl=p=>PLABEL[p]||p;
