@@ -651,7 +651,9 @@ const PC={"AKP":"#FF6B35","CHP":"#E31E24","DEM":"#9333EA","MHP":"#1E40AF","İYİ
 const TC=['#3B82F6','#EF4444','#10B981','#F59E0B','#8B5CF6','#06B6D4','#F97316','#84CC16','#EC4899','#6366F1','#14B8A6','#F43F5E','#A78BFA','#34D399','#FBBF24','#60A5FA','#FB923C','#4ADE80','#A3E635'];
 let fil=[...D],pg=0,PG=24,cur=null,cmp=[];
 const MXQ=Math.max(...D.map(r=>r.q));
-const pc=p=>PC[p]||'#6B7280';
+const CANON_PARTY={HDP:'DEM',BDP:'DEM',DEHAP:'DEM',DTP:'DEM',HADEP:'DEM',YSP:'DEM'};
+const canonParty=p=>CANON_PARTY[p]||p;
+const pc=p=>PC[canonParty(p)]||PC[p]||'#6B7280';
 const badge=p=>{const c=pc(p);return`<span class="pb" style="background:${c}20;color:${c};border:1px solid ${c}44">${p||'?'}</span>`;};
 const actBadge=q=>q===0?`<span class="rb rz">${S('badge-zero')}</span>`:q<=10?`<span class="rb rl">${S('badge-low')}</span>`:'';
 
@@ -690,7 +692,7 @@ function applyF(){
   fil=D.filter(r=>{
     if(q&&!r.name.toLowerCase().includes(q)&&!r.province.toLowerCase().includes(q))return false;
     if(pv&&r.province!==pv)return false;
-    if(pa&&r.party!==pa)return false;
+    if(pa&&canonParty(r.party)!==pa)return false;
     if(ac==='zero'&&r.q!==0)return false;
     if(ac==='low'&&!(r.q>=1&&r.q<=10))return false;
     if(ac==='mid'&&!(r.q>10&&r.q<=100))return false;
@@ -822,8 +824,9 @@ let _scoreListenersAdded=false;
 function openScore(){
   const sel=document.getElementById('sc-party');
   if(sel.options.length<=1){
-    [...new Set(D.map(r=>r.party).filter(Boolean))].sort().forEach(p=>{
-      const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);
+    const PLABEL_SC={DEM:'DEM / HDP / BDP'};
+    [...new Set(D.map(r=>canonParty(r.party)).filter(Boolean))].sort().forEach(p=>{
+      const o=document.createElement('option');o.value=p;o.textContent=PLABEL_SC[p]||p;sel.appendChild(o);
     });
   }
   const ysel=document.getElementById('sc-year');
@@ -855,7 +858,7 @@ function rScoreTable(){
   const yr=parseInt((document.getElementById('sc-year')||{}).value)||0;
   let rows=[...D];
   if(q) rows=rows.filter(r=>r.name.toLowerCase().includes(q)||r.province.toLowerCase().includes(q));
-  if(pa) rows=rows.filter(r=>r.party===pa);
+  if(pa) rows=rows.filter(r=>canonParty(r.party)===pa);
   if(yr) rows=rows.filter(r=>r.y0<=yr&&r.y1>=yr);
   rows.sort((a,b)=>ord==='desc'?b.score-a.score:a.score-b.score);
   document.getElementById('sc-count').textContent=rows.length.toLocaleString('tr')+' '+S('sc-count-suffix');
@@ -1140,13 +1143,15 @@ function rProv(){
 
 function rParty(){
   const by={};
-  D.forEach(r=>{if(!r.party)return;if(!by[r.party])by[r.party]={q:0,sp:0,b:0,n:0};by[r.party].q+=r.q;by[r.party].sp+=r.speeches;by[r.party].b+=r.bills;by[r.party].n++;});
+  D.forEach(r=>{if(!r.party)return;const cp=canonParty(r.party);if(!by[cp])by[cp]={q:0,sp:0,b:0,n:0};by[cp].q+=r.q;by[cp].sp+=r.speeches;by[cp].b+=r.bills;by[cp].n++;});
   const ps=Object.keys(by).sort((a,b)=>by[b].q-by[a].q);
+  const PLABEL={DEM:'DEM/HDP/BDP'};
+  const pl=p=>PLABEL[p]||p;
   const lo=t=>{return{margin:{l:50,r:30,t:10,b:60},paper_bgcolor:'transparent',plot_bgcolor:'transparent',yaxis:{title:t,showgrid:true,gridcolor:'#f0f0f0'},font:{family:'Inter,sans-serif',size:12},height:320}};
   const op={responsive:true,displayModeBar:false};
-  Plotly.newPlot('pc-q',[{type:'bar',x:ps,y:ps.map(p=>by[p].q),marker:{color:ps.map(p=>pc(p)),opacity:.87},text:ps.map(p=>by[p].q.toLocaleString('tr')),textposition:'outside',hovertemplate:'%{x}: %{y}<extra></extra>'}],lo(S('party-q-title')),op);
-  Plotly.newPlot('pc-sp',[{type:'bar',x:ps,y:ps.map(p=>by[p].sp),marker:{color:ps.map(p=>pc(p)),opacity:.82},text:ps.map(p=>by[p].sp.toLocaleString('tr')),textposition:'outside',hovertemplate:'%{x}: %{y}<extra></extra>'}],lo(S('party-sp-title')),op);
-  Plotly.newPlot('pc-b',[{type:'bar',x:ps,y:ps.map(p=>by[p].b),marker:{color:ps.map(p=>pc(p)),opacity:.77},hovertemplate:'%{x}: %{y}<extra></extra>'}],lo(S('party-b-title')),op);
+  Plotly.newPlot('pc-q',[{type:'bar',x:ps.map(pl),y:ps.map(p=>by[p].q),marker:{color:ps.map(p=>pc(p)),opacity:.87},text:ps.map(p=>by[p].q.toLocaleString('tr')),textposition:'outside',hovertemplate:'%{x}: %{y}<extra></extra>'}],lo(S('party-q-title')),op);
+  Plotly.newPlot('pc-sp',[{type:'bar',x:ps.map(pl),y:ps.map(p=>by[p].sp),marker:{color:ps.map(p=>pc(p)),opacity:.82},text:ps.map(p=>by[p].sp.toLocaleString('tr')),textposition:'outside',hovertemplate:'%{x}: %{y}<extra></extra>'}],lo(S('party-sp-title')),op);
+  Plotly.newPlot('pc-b',[{type:'bar',x:ps.map(pl),y:ps.map(p=>by[p].b),marker:{color:ps.map(p=>pc(p)),opacity:.77},hovertemplate:'%{x}: %{y}<extra></extra>'}],lo(S('party-b-title')),op);
 }
 
 function fProv(p){document.getElementById('f-prov').value=p;showTab('mv');}
