@@ -652,7 +652,7 @@ const TC=['#3B82F6','#EF4444','#10B981','#F59E0B','#8B5CF6','#06B6D4','#F97316',
 let fil=[...D],pg=0,PG=24,cur=null,cmp=[];
 const MXQ=Math.max(...D.map(r=>r.q));
 const CANON_PARTY={HDP:'DEM',BDP:'DEM','BDP;DBP':'DEM',DEHAP:'DEM',DTP:'DEM',HADEP:'DEM',YSP:'DEM',IYI:'İYİ','—':null,'-':null};
-const canonParty=p=>CANON_PARTY[p]||p;
+const canonParty=p=>p in CANON_PARTY?CANON_PARTY[p]:p;
 const pc=p=>PC[canonParty(p)]||PC[p]||'#6B7280';
 const badge=p=>{const c=pc(p);return`<span class="pb" style="background:${c}20;color:${c};border:1px solid ${c}44">${p||'?'}</span>`;};
 const actBadge=q=>q===0?`<span class="rb rz">${S('badge-zero')}</span>`:q<=10?`<span class="rb rl">${S('badge-low')}</span>`:'';
