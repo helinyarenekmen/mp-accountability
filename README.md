@@ -1,6 +1,6 @@
-# 🏛️ Milletvekili Hesap Verebilirlik Portalı
+#  Milletvekili Hesap Verebilirlik Portalı
 
-**🔗 [helinyarenekmen.github.io/mp-accountability](https://helinyarenekmen.github.io/mp-accountability/)**
+** [helinyarenekmen.github.io/mp-accountability](https://helinyarenekmen.github.io/mp-accountability/)**
 
 Türkiye Büyük Millet Meclisi'nde görev yapmış milletvekillerinin yasama faaliyetlerini karşılaştırmalı olarak sunan interaktif bir veri portalı.
 
